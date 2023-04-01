@@ -2,8 +2,8 @@
 
 const MAX_SWAPS = 10;
 const MIN_SWAPS = 5;
-const MAX_WAIT_TIME = 6;  // seconds
-const MIN_WAIT_TIME = 1;  // seconds
+const MAX_WAIT_TIME = 60;  // seconds
+const MIN_WAIT_TIME = 10;  // seconds
 
 const makeModule = (title, credits, type) => ({
     placeholder: !title,
