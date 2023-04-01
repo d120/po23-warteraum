@@ -1,0 +1,64 @@
+body {
+    background-color: var(--tuda-0a);
+    margin: 0;
+    padding: 0;
+}
+
+.plan {
+    display: flex;
+    width: calc(100% - 2 * 1rem);
+    padding: 0.5rem;
+    margin: 0.5rem;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 0.5rem;
+    background-color: white;
+}
+
+.semester {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.module {
+    height: 5rem;
+    padding: 1rem;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+}
+
+.module.compulsory {
+    background-color: var(--tuda-2a);
+}
+.module.elective {
+    background-color: var(--tuda-4a);
+}
+.module.semi-elective {
+    background-color: var(--tuda-4c);
+}
+.module.thesis {
+    background-color: var(--tuda-8b);
+}
+.module.generale {
+    background-color: var(--tuda-10a);
+}
+
+.header {
+    padding: 1rem;
+    font-weight: bolder;
+    text-align: center;
+    font-size: large;
+    background-color: var(--tuda-0b);
+}
+
+
+.transition {
+    transition: transform ease-in 0.3s;
+}
