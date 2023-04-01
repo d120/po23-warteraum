@@ -1,7 +1,14 @@
 body {
+    font-family: 'Roboto', sans-serif;
     background-color: var(--tuda-0a);
     margin: 0;
     padding: 0;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .plan {
@@ -49,6 +56,9 @@ body {
 .module.generale {
     background-color: var(--tuda-10a);
 }
+.placeholder.placeholder {
+    opacity: 0;
+}
 
 .header {
     padding: 1rem;
@@ -60,5 +70,7 @@ body {
 
 
 .transition {
-    transition: transform ease-in 0.3s;
+    transition: transform ease-in 0.2s;  /* time must be synchronized with JS timeout */
+    z-index: 1000000;
+    box-shadow: 0 0 1rem 0.1rem var(--tuda-0c);
 }

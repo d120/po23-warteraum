@@ -1,6 +1,20 @@
 "use strict";
 
-const makeModule = (title, credits, type) => ({ title, credits, type: type || "compulsory" });
+const MAX_SWAPS = 10;
+const MIN_SWAPS = 5;
+const MAX_WAIT_TIME = 6;  // seconds
+const MIN_WAIT_TIME = 1;  // seconds
+
+const makeModule = (title, credits, type) => ({
+    placeholder: !title,
+    title,
+    credits,
+    type: type || "compulsory",
+});
+
+const s = (time) => time * 1000;  // converts seconds to milliseconds
+
+const randomInt = (min, max) =>  Math.floor(Math.random() * (max - min + 1)) + min;
 
 const semesters = [
     [
@@ -9,12 +23,15 @@ const semesters = [
         makeModule("Mathematik I", 9),
         makeModule("Automaten, formale Sprachen und Entscheidbarkeit", 5),
         makeModule("Mentorensystem", 0),
+        makeModule(),
     ],
     [
         makeModule("Algorithmen und Datenstrukturen", 10),
         makeModule("Rechnerorganisation", 5),
         makeModule("Mathematik II", 9),
         makeModule("Aussagen- und Prädikatenlogik", 5),
+        makeModule(),
+        makeModule(),
     ],
     [
         makeModule("Software Engineering", 5),
@@ -29,21 +46,31 @@ const semesters = [
         makeModule("Computational Engineering und Robotik", 5),
         makeModule("Computer-Netzwerke und verteilte Systeme", 5),
         makeModule("Mathematik III", 8),
-        makeModule("Formale Methoden im Softwareentwurf", 5)
+        makeModule("Formale Methoden im Softwareentwurf", 5),
+        makeModule("Fachübergreifende Lehrveranstaltungen", 3, "generale"),
     ],
     [
         makeModule("Betriebssysteme", 5),
         makeModule("Visual Computing", 5),
         makeModule("Bachelorpraktikum", 9),
+        makeModule("Wahlbereich Fachprüfungen", 6),
+        makeModule("Wahlbereich Seminare", 3),
+        makeModule("Fachübergreifende Lehrveranstaltungen", 4, "generale"),
     ],
     [
         makeModule("Bachelor-Thesis", 12, "thesis"),
+        makeModule("Wahlbereich Fachprüfungen", 12, "elective"),
+        makeModule("Wahlbereich Praktika", 6, "elective"),
+        makeModule(),
+        makeModule(),
+        makeModule(),
     ],
 ];
 
-const displayModules = () => {
+const refreshModules = () => {
     const $plan = document.querySelector("#plan");
-    let i = 1;
+    $plan.innerHTML = "";
+    let semesterIdx = 0;
     for (const semester of semesters) {
         const $semester = document.createElement("div");
         $plan.appendChild($semester);
@@ -54,30 +81,39 @@ const displayModules = () => {
         $header.classList.add("header");
         const $headerTitle = document.createElement("span");
         $header.appendChild($headerTitle);
-        $headerTitle.innerText = `${i}. Semester`;
+        $headerTitle.innerText = `${semesterIdx + 1}. Semester`;
 
+        let moduleIdx = 0;
         for (const module of semester) {
             const $module = document.createElement("div");
             $semester.appendChild($module);
             $module.classList.add("module");
             $module.classList.add(module.type);
+            $module.setAttribute("data-semester-idx", semesterIdx);
+            $module.setAttribute("data-module-idx", moduleIdx);
 
-            const $moduleTitle = document.createElement("span");
-            $module.appendChild($moduleTitle);
-            $moduleTitle.innerText = module.title;
+            if (module.placeholder) {
+                $module.classList.add("placeholder");
+            } else {
+                const $moduleTitle = document.createElement("span");
+                $module.appendChild($moduleTitle);
+                $moduleTitle.innerText = module.title;
 
-            const $credits = document.createElement("span");
-            $module.appendChild($credits);
-            $credits.innerText = `(${module.credits} CP)`;
+                const $credits = document.createElement("span");
+                $module.appendChild($credits);
+                $credits.innerText = `(${module.credits} CP)`;
+            }
+
+            moduleIdx++;
         }
 
-        i++;
+        semesterIdx++;
     }
 };
 
 const pickRandomModule = () => {
     const $modules = document.querySelectorAll(".module");
-    return $modules[Math.floor(Math.random() * $modules.length)];
+    return $modules[randomInt(0, $modules.length - 1)];
 };
 
 const swap = (moduleA, moduleB) => {
@@ -89,21 +125,63 @@ const swap = (moduleA, moduleB) => {
     const moduleBFinalY = moduleA.getBoundingClientRect().top  - moduleB.getBoundingClientRect().top;
     moduleA.style.transform = `translate(${moduleAFinalX}px, ${moduleAFinalY}px)`;
     moduleB.style.transform = `translate(${moduleBFinalX}px, ${moduleBFinalY}px)`;
-    /*
+
+    const moduleASemesterIdx = moduleA.getAttribute("data-semester-idx");
+    const moduleBSemesterIdx = moduleB.getAttribute("data-semester-idx");
+    const moduleAModuleIdx = moduleA.getAttribute("data-module-idx");
+    const moduleBModuleIdx = moduleB.getAttribute("data-module-idx");
+    const tmp = semesters[moduleBSemesterIdx][moduleBModuleIdx];
+    semesters[moduleBSemesterIdx][moduleBModuleIdx] = semesters[moduleASemesterIdx][moduleAModuleIdx];
+    semesters[moduleASemesterIdx][moduleAModuleIdx] = tmp;
+
     setTimeout(() => {
-        //moduleB.parentElement.insertBefore(moduleB, moduleA);
+        refreshModules();
         moduleA.classList.remove("transition");
         moduleB.classList.remove("transition");
         moduleA.removeAttribute("style");
         moduleB.removeAttribute("style");
-    }, 1000);
-    */
+    }, s(0.2));  // timeout must be synchronized with CSS rules
+};
+
+const swapRandomModules = () => {
+    console.log("swapping two random modules");
+    const moduleA = pickRandomModule();
+    // reject saples until we found a module that is not module A
+    let moduleB = undefined;
+    do {
+        moduleB = pickRandomModule();
+    } while (moduleA === moduleB);
+    swap(moduleA, moduleB);
+};
+
+const startSwapBatch = (callback) => {
+    callback = callback || (() => {});
+    const swaps = randomInt(MIN_SWAPS, MAX_SWAPS);
+    console.log(`starting swap batch with ${swaps} swaps`);
+    let counter = 0;
+    const id = setInterval(() => {
+        counter++;
+        if (counter <= swaps) {
+            swapRandomModules();
+        } else {
+            console.log("swap batch finished; clearing interval");
+            clearInterval(id);
+            callback();
+        }
+    }, s(0.3));
+};
+
+const startPeriodicSwapping = (first) => {
+    const waitTime = first ? 0 : randomInt(MIN_WAIT_TIME, MAX_WAIT_TIME);
+    console.log(`waiting ${waitTime} seconds before next swap batch`);
+    setTimeout(() => {
+        startSwapBatch(() => {
+            startPeriodicSwapping();
+        });
+    }, s(waitTime));
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-    console.log('loaded');
-    displayModules();
-    console.log(pickRandomModule());
-
-    setInterval(() => swap(pickRandomModule(), pickRandomModule()), 1000);
+    refreshModules();
+    startPeriodicSwapping(true);
 });
