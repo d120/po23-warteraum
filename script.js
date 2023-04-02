@@ -116,43 +116,46 @@ const pickRandomModule = () => {
     return $modules[randomInt(0, $modules.length - 1)];
 };
 
-const swap = (moduleA, moduleB, callback) => {
-    moduleA.classList.add("transition");
-    moduleB.classList.add("transition");
-    const moduleAFinalX = moduleB.getBoundingClientRect().left - moduleA.getBoundingClientRect().left;
-    const moduleAFinalY = moduleB.getBoundingClientRect().top  - moduleA.getBoundingClientRect().top;
-    const moduleBFinalX = moduleA.getBoundingClientRect().left - moduleB.getBoundingClientRect().left;
-    const moduleBFinalY = moduleA.getBoundingClientRect().top  - moduleB.getBoundingClientRect().top;
-    moduleA.style.transform = `translate(${moduleAFinalX}px, ${moduleAFinalY}px)`;
-    moduleB.style.transform = `translate(${moduleBFinalX}px, ${moduleBFinalY}px)`;
+const swap = ($moduleA, $moduleB, callback) => {
+    $moduleA.classList.add("transition");
+    $moduleB.classList.add("transition");
+    const moduleAFinalX = $moduleB.getBoundingClientRect().left - $moduleA.getBoundingClientRect().left;
+    const moduleAFinalY = $moduleB.getBoundingClientRect().top  - $moduleA.getBoundingClientRect().top;
+    const moduleBFinalX = $moduleA.getBoundingClientRect().left - $moduleB.getBoundingClientRect().left;
+    const moduleBFinalY = $moduleA.getBoundingClientRect().top  - $moduleB.getBoundingClientRect().top;
+    $moduleA.style.transform = `translate(${moduleAFinalX}px, ${moduleAFinalY}px)`;
+    $moduleB.style.transform = `translate(${moduleBFinalX}px, ${moduleBFinalY}px)`;
 
-    const moduleASemesterIdx = moduleA.getAttribute("data-semester-idx");
-    const moduleBSemesterIdx = moduleB.getAttribute("data-semester-idx");
-    const moduleAModuleIdx = moduleA.getAttribute("data-module-idx");
-    const moduleBModuleIdx = moduleB.getAttribute("data-module-idx");
+    const moduleASemesterIdx = $moduleA.getAttribute("data-semester-idx");
+    const moduleBSemesterIdx = $moduleB.getAttribute("data-semester-idx");
+    const moduleAModuleIdx = $moduleA.getAttribute("data-module-idx");
+    const moduleBModuleIdx = $moduleB.getAttribute("data-module-idx");
     const tmp = semesters[moduleBSemesterIdx][moduleBModuleIdx];
     semesters[moduleBSemesterIdx][moduleBModuleIdx] = semesters[moduleASemesterIdx][moduleAModuleIdx];
     semesters[moduleASemesterIdx][moduleAModuleIdx] = tmp;
 
     setTimeout(() => {
         refreshModules();
-        moduleA.classList.remove("transition");
-        moduleB.classList.remove("transition");
-        moduleA.removeAttribute("style");
-        moduleB.removeAttribute("style");
+        $moduleA.classList.remove("transition");
+        $moduleB.classList.remove("transition");
+        $moduleA.removeAttribute("style");
+        $moduleB.removeAttribute("style");
         callback();
     }, s(0.2));  // timeout must be synchronized with CSS rules
 };
 
 const swapRandomModules = (callback) => {
     console.log("swapping two random modules");
-    const moduleA = pickRandomModule();
+    const $modules = document.querySelectorAll(".module");
+    const moduleAIdx = randomInt(0, $modules.length - 1);
     // reject saples until we found a module that is not module A
-    let moduleB = undefined;
+    let moduleBIdx = undefined;
     do {
-        moduleB = pickRandomModule();
-    } while (moduleA === moduleB);
-    swap(moduleA, moduleB, callback);
+        moduleBIdx = randomInt(0, $modules.length - 1);
+    } while (moduleAIdx === moduleBIdx);
+    const $moduleA = $modules[moduleAIdx];
+    const $moduleB = $modules[moduleBIdx];
+    swap($moduleA, $moduleB, callback);
 };
 
 const startSwapBatch = (callback) => {
