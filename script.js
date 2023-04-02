@@ -53,9 +53,9 @@ const semesters = [
         makeModule("Betriebssysteme", 5),
         makeModule("Visual Computing", 5),
         makeModule("Bachelorpraktikum", 9),
-        makeModule("Wahlbereich Fachprüfungen", 6),
-        makeModule("Wahlbereich Seminare", 3),
-        makeModule("Fachübergreifende Lehrveranstaltungen", 4, "generale"),
+        makeModule("Wahlbereich Fachprüfungen", 6, "elective"),
+        makeModule("Wahlbereich Seminare", 3, "elective"),
+        makeModule("Fachübergreifende Lehrveranstaltungen", 3, "generale"),
     ],
     [
         makeModule("Bachelor-Thesis", 12, "thesis"),
