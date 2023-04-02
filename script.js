@@ -116,7 +116,7 @@ const pickRandomModule = () => {
     return $modules[randomInt(0, $modules.length - 1)];
 };
 
-const swap = (moduleA, moduleB) => {
+const swap = (moduleA, moduleB, callback) => {
     moduleA.classList.add("transition");
     moduleB.classList.add("transition");
     const moduleAFinalX = moduleB.getBoundingClientRect().left - moduleA.getBoundingClientRect().left;
@@ -140,10 +140,11 @@ const swap = (moduleA, moduleB) => {
         moduleB.classList.remove("transition");
         moduleA.removeAttribute("style");
         moduleB.removeAttribute("style");
+        callback();
     }, s(0.2));  // timeout must be synchronized with CSS rules
 };
 
-const swapRandomModules = () => {
+const swapRandomModules = (callback) => {
     console.log("swapping two random modules");
     const moduleA = pickRandomModule();
     // reject saples until we found a module that is not module A
@@ -151,7 +152,7 @@ const swapRandomModules = () => {
     do {
         moduleB = pickRandomModule();
     } while (moduleA === moduleB);
-    swap(moduleA, moduleB);
+    swap(moduleA, moduleB, callback);
 };
 
 const startSwapBatch = (callback) => {
@@ -159,16 +160,15 @@ const startSwapBatch = (callback) => {
     const swaps = randomInt(MIN_SWAPS, MAX_SWAPS);
     console.log(`starting swap batch with ${swaps} swaps`);
     let counter = 0;
-    const id = setInterval(() => {
+    const countSwap = () => {
         counter++;
         if (counter <= swaps) {
-            swapRandomModules();
+            swapRandomModules(countSwap);
         } else {
-            console.log("swap batch finished; clearing interval");
-            clearInterval(id);
             callback();
         }
-    }, s(0.3));
+    };
+    countSwap();
 };
 
 const startPeriodicSwapping = (first) => {
